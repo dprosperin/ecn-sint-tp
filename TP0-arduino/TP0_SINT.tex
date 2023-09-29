@@ -1,0 +1,178 @@
+\documentclass[11pt]{paper}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+
+\usepackage{placeins}
+
+\usepackage{listings}
+
+\newcommand{\version}{1.0.0{ }}
+
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\tiny\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  tabsize=2
+}
+
+\usepackage{todonotes}
+
+\usepackage[framemethod=TikZ]{mdframed}
+
+\lstset{% general command to set parameter(s)
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{magenta}\bfseries, % underlined bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{black}, % white comments
+	stringstyle=\ttfamily, % typewriter type for strings
+	showstringspaces=false % no special string spaces
+} 
+
+\lstdefinelanguage{aald}
+	{morekeywords={system, implementation},
+	sensitive=false,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.7}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{Temps réel }
+\fancyfoot[LO]{Centrale Nantes -- \today}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+ \setlength{\parskip}{1.2ex plus .9ex minus .4ex}
+
+\newcommand{\ocv}{{\tt OpenCV}\xspace} 
+\newcommand{\alsa}{{\tt ALSA}\xspace} 
+\newcommand{\aadl}{{\tt AADL}\xspace} 
+\newcommand{\xeno}{{\tt Xenomai}\xspace} 
+
+
+\title{{\Large Systèmes interconnectés -- SINT }\\
+\vspace{-0.4em}
+{\large Sujet de TP 0 : Prise en main Arduino}\\
+{\small Centrale Nantes}\\
+\small P.-E. Hladik, \small{\texttt{pehladik@ec-nantes.fr}}\\
+---\\
+{\scriptsize  Version \version (\today)}\\
+}
+
+
+\begin{document}
+
+\maketitle
+
+%\begin{table}[htdp]
+%\caption{Suivi des modifications}
+%\begin{center}
+%\begin{tabular}{|c|c|c|p{8cm}|}
+%\hline
+%Date & Version & Auteur & Modifications\\
+%\hline
+%JJ/MM/12 & 0.3.X & P.-E. Hladik&  \\
+%\hline
+%\end{tabular}
+%\end{center}
+%\label{default}
+%\end{table}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Objectifs pédagogiques}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+	\item utiliser l'IDE Arduino
+	\item utiliser un analyseur logique et PulseWiew
+	\item bonne pratique (simple) pour implémenter des fonctions périodiques
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Programmer sur Arduino}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Faire clignoter sur la Teensy une led à $2~Hz$ et une autre de manière aléatoire avec un délai entre 200 et 700 ms (code initial du TD 0 sur hippocampus ). Le code disponible (ci-dessous) est uniquement fourni pour vous aider à prendre en main les fonctions existantes pour contrôler les leds.
+
+\begin{lstlisting}[language=C]
+#define PIN_LED0 3
+#define PIN_LED1 4
+
+void setup() {
+  pinMode(PIN_LED0, OUTPUT); // Initialisation de la broche 3
+  pinMode(PIN_LED1, OUTPUT); // Initialisation de la broche 4 
+  randomSeed(analogRead(0)) ; // Initialisation du generateur aleatoire
+}
+
+void loop() {
+  digitalWrite (PIN_LED1, 1) ; // mise a l'etat haut de la broche 3
+  delay(500); // attente de 500 ms
+  digitalWrite (PIN_LED0, 0) ; // mise a l'etat bas de la broche 4
+  delay(200+random(500)); // attente aleatoire de 200 a 699 ms
+}
+\end{lstlisting}
+  
+La fonction \href{https://www.arduino.cc/reference/en/language/functions/time/delay/}{\tt delay} bloque l'exécution, regarder plutôt \href{https://www.arduino.cc/reference/en/language/functions/time/millis/}{\texttt{millis}}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Utilisation de PulseView}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Utiliser l'analyseur logique pour visualiser les signaux (voir le guide dédié à PulseView sur hippocampus). Vous pouvez les observer directement sur les fiches bananes à l'arrière de la carte. 
+
+
+\end{document}
