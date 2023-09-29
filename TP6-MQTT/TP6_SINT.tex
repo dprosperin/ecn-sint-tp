@@ -1,0 +1,427 @@
+\documentclass[11pt]{paper}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+
+\usepackage{placeins}
+
+\usepackage{listings}
+
+\lstdefinestyle{myStyle}{
+    belowcaptionskip=1\baselineskip,
+    breaklines=true,
+    frame=none,
+    numbers=none, 
+    basicstyle=\footnotesize\ttfamily,
+    keywordstyle=\bfseries\color{green!40!black},
+    commentstyle=\itshape\color{purple!40!black},
+    identifierstyle=\color{blue},
+    backgroundcolor=\color{gray!10!white},
+}
+
+\lstset{style=myStyle}
+
+\usepackage{todonotes}
+
+\usepackage[framemethod=TikZ]{mdframed}
+
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.7}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{SINT }
+\fancyfoot[LO]{Centrale Nantes -- \today}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+ \setlength{\parskip}{1.2ex plus .9ex minus .4ex}
+
+\newcommand{\ocv}{{\tt OpenCV}\xspace} 
+\newcommand{\alsa}{{\tt ALSA}\xspace} 
+\newcommand{\aadl}{{\tt AADL}\xspace} 
+\newcommand{\xeno}{{\tt Xenomai}\xspace} 
+\newcommand{\iic}{I$^2$C\xspace} 
+
+\newcommand\rasp{Raspberry Pi\xspace}
+\newcommand\sub{{\it subscriber}\xspace}
+\newcommand\subs{{\it subscribers}\xspace}
+\newcommand\pub{{\it publisher}\xspace}
+\newcommand\broker{{\it broker}\xspace}
+
+\newcommand{\version}{1.0.1{ }}
+
+\title{{\Large Systèmes interconnectés -- SINT }\\
+\vspace{-0.4em}
+{\large Sujet de TP 6 : MQTT}\\
+{\small Centrale Nantes}\\
+\small P.-E. Hladik, \small{\texttt{pehladik@ec-nantes.fr}}\\
+---\\
+{\scriptsize  Version \version (\today)}\\
+}
+
+
+\begin{document}
+
+\maketitle
+
+%\begin{table}[htdp]
+%\caption{Suivi des modifications}
+%\begin{center}
+%\begin{tabular}{|c|c|c|p{8cm}|}
+%\hline
+%Date & Version & Auteur & Modifications\\
+%\hline
+%JJ/MM/12 & 0.3.X & P.-E. Hladik&  \\
+%\hline
+%\end{tabular}
+%\end{center}
+%\label{default}
+%\end{table}%
+\vspace{-6em}
+\begin{center}
+\includegraphics[width=\textwidth/2]{./figures-pdf/mqtt_logo}
+\end{center}
+\vspace{-4em}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Objectifs pédagogiques}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{itemize}
+	\item comprendre et utiliser MQTT depuis un PC et un micro-contrôleur 
+	\item déployer un \broker MQTT, projet Paho
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Rendu}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+À la fin du TP déposez sur Hippocampus une archive avec un compte rendu en pdf (voir les éléments demandés dans le texte).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Architecture déployée pour le TP}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Nous utilisons le \broker Mosquitto (\url{https://mosquitto.org}). Il a été déployé sur deux serveurs, un sur une \rasp 3B et l'autre sur une \rasp 4 qui servent de point d'accès. Il y a deux points d'accès car les \rasp limitent le nombre de stations connectées. Les points d'accès ont été configurés à l'aide de RaspAP (\url{https://raspap.com}). Répartissez-vous les points d'accès de manière à ne pas les surcharger.
+
+Le point d'accès de la \rasp 3B déploie un réseau nommé {\tt raspi-webgui} et celui de la \rasp 4 se nomme {\tt raspi-webgui4}. La clef WEP2 utilisée pour les deux réseaux est {\tt ChangeMe}.
+
+Une fois établit la connexion WiFi, il est possible de se connecter à la \rasp en ssh avec l'id {\tt pi} et le mot de passe {\tt kywy}. L'adresse IP de la raspberry est {\tt 10.3.141.1}, l'adresse des machines connectées sur le point d'accès est de type {\tt 10.3.141.xxx}.
+
+Le \broker utilise le port 1883 pour les communication MQTT et 9001 pour le websocket.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Premier contact avec MosQuiTTo}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Publication et souscription locale}
+
+Connecter vous sur la Raspi en ssh (mot de passe {\tt kywy}) :
+\begin{lstlisting}[language=bash]
+ssh pi@10.3.141.1
+\end{lstlisting}
+
+Vous pouvez vérifier que le \broker est lancé en utilisant la commande (il faudra faire un ctrl+C pour quitter) :
+\begin{lstlisting}[language=bash]
+systemctl status mosquitto 
+\end{lstlisting}
+
+Pour tester MQTT vous allez créer un client \pub et un \sub sur la \rasp. Lancer deux terminaux et connecter vous depuis chacun à la \rasp.
+
+Utiliser ensuite les commandes {\tt mosquitto\_sub}\footnote{\href{https://mosquitto.org/man/mosquitto_sub-1.html}{https://mosquitto.org/man/mosquitto\_sub-1.html}} et {\tt mosquitto\_pub}\footnote{\href{https://mosquitto.org/man/mosquitto_pub-1.html}{https://mosquitto.org/man/mosquitto\_pub-1.html}} pour créer un \sub et un \pub (chacun dans son terminal). Le premier client s'abonnera au topic que vous voulez et le second devra publier 'helloworld' sur ce topic. {\bf Attention vous allez tous utiliser le même \broker, pensez donc à mettre des noms explicites et uniques pour les topics (par exemple en commençant par votre nom).}
+
+Utiliser la fonction {\tt mosquitto\_sub} pour s’abonner à un topic et {\tt mosquitto\_pub} pour publier, ces fonctions ont besoin d’arguments (notamment {\tt -t}) que vous pourrez trouver grâce à l'aide ({\tt mosquitto\_sub --help}). Il va falloir trouver l'option pour passer le message de {\tt mosquitto\_pub} (regardez les notes de fin de page).
+
+Lancez le \sub dans un terminal et, une fois le message publié dans un autre terminal, vérifiez qu’il a bien été reçu par le \sub. 
+
+Maintenant que vous avez réussi, ouvrez un troisième terminal et créez un second client abonné au même topic. En publiant un nouveau message, vérifiez que les deux clients \subs le reçoivent bien.\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez une capture d'écran avec les terminaux pour montrer que vous avez bien réaliser une publication et souscription.}
+
+%mosquitto\_sub -t 'test/topic'
+%mosquitto\_pub -t 'test/topic' -m 'helloWorld'
+
+
+\subsection{Publication et souscription distante}
+
+Installer le client open-source MQTTX sur votre machine (\url{https://mqttx.app}). {\bf Attention MQTTX n'a été testé que sur Mac OS, si vous constatez que c'est trop compliqué à installer sur votre machine passer à la suite.}
+
+Lancer l'application cliente pour vous connectez au \broker. Tester l'envoi et la réception d'un message entre MQQTX et le \broker. Pour cela utiliser le terminal pour disposer d'un \pub ou d'un \sub.\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez une capture d'écran de MQTTX et du terminal qui montre que vous avez réussi à envoyer et recevoir des messages.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{MQTT avec la carte Feather}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Présentation du matériel}
+
+La carte Adafruit-feather-M0-Wifi contient un contrôleur WiFi \og ATWINC 1500 \fg d'Atmel (maintenant Microchip), qui est connecté au micro-contrôleur par bus SPI.
+
+Le contrôleur WiFi ATWINC 1500 :
+\begin{itemize}
+	\item permet de le configurer en point d'accès ou en station,
+	\item implémente les protocoles DHCP, DNS, TCP/IP (IPv4), UDP, HTTP, HTTPS,
+	\item implémente les protocoles de sécurité WPA/WPA2 Personal, TLS, SSL.
+\end{itemize}
+
+La sécurité WEP n'est pas implémentée (ce qui signifie que ce contrôleur ne peut pas se connecter à un réseau WiFi sécurisé par WEP).
+
+La librairie Arduino qui implémente le pilote est Wifi101. {\bf Ne pas utiliser la librairie Wifi.} Attention, la documentation de la librairie n'est pas vraiment à jour.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Installation des bibliothèques}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Pour mettre en œuvre la communication MQTT sur la Feather M0, nous utiliserons les bibliothèques Arduino :
+\begin{itemize}
+	\item WiFi101 d'Arduino,
+	\item PubSub Client de Nick O'Leary.\\
+\end{itemize}
+
+Avant de commencer, installez ces bibliothèques en utilisant le \href{https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries#toc3}{gestionnaire de bibliothèques} de l'IDE Arduino.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Connexion WiFi}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Ouvrez le croquis d'exemple {\tt ConnectWithWPA} de la bibliothèque WiFi101. Faites-en un copie dans un nouveau projet et modifiez le fichier {\tt arduino\_secret} avec les identifiant de connexion au WiFi.
+
+Ajouter au début du {\tt setup} la ligne suivante afin de configurer les broches du port SPI pour avoir accès au contrôleur WiFi :
+\begin{lstlisting}
+  // Configure les broche pour Adafruit ATWINC1500 Feather
+  WiFi.setPins(8,7,4,2);
+\end{lstlisting}
+
+Observer le code dans le {\tt setup} et la sortie sur le port série. Quelle est votre adresse ?\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez une capture d'écran du log sur le port série montrant que vous avez réussi à vous connecter au WiFi et avec votre adresse.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Connexion au \broker}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Utiliser le fichier précédent comme base pour la suite du TP. 
+
+Les services MQTT sont offerts par la librairie PubSub. Commencez par inclure son entête :
+\begin{lstlisting}[language=C++]
+	#include <PubSubClient.h>
+\end{lstlisting}
+
+La documentation de la librairie  PubSub se trouve sur \url{https://pubsubclient.knolleary.net/api}. Vous en aurez besoin.
+
+Ajouter les constantes et variables suivantes :
+\begin{lstlisting}[language=C]
+#define MQTT_broker "10.3.141.1"  // Addresse du broker MQTT (IP or URL)
+#define MQTT_PORT 1883  // port 1883 pour la connexion non securisee
+
+WiFiClient WiFiclient; // instantciation d'un client WiFi  non-SSL 
+PubSubClient client(WiFiclient); // Utilise le WiFi pour la communication MQTT
+
+// Chaque client MQTT doit avoir un ID unique
+String device_id = "FeatherM0-";  // Ajouter par exemple l'adresse MAC
+\end{lstlisting}
+{\bf Attention vous vous connectez tous au même \broker, utiliser un ID unique !}
+
+La librairie utilise une fonction de rappel quand un message arrive suite à un abonnement. Il faut donc définir cette fonction. Pour commencer, on peut utiliser la fonction du fichier d'exemple {\tt mqqt\_basic}:
+\begin{lstlisting}[language=C]
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i=0;i<length;i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+}
+  \end{lstlisting}
+
+Pour initialiser la connexion avec le \broker, il faut initialiser les paramètres du \broker. Appeler la méthode \texttt{setServer} de la classe {\tt PubSubClient}  afin d'associer les paramètres du serveur, et {\tt setCallback} pour lier la fonction de callback. Ajoutez dans le {\tt setup} les éléments suivants :
+
+\begin{lstlisting}[language=C]
+    client.setServer(MQTT_broker, MQTT_PORT); // parametres du broker
+    client.setCallback(callback); // fonction d'appel pour traiter les messages
+ \end{lstlisting}
+  
+Pour se connecter au \broker, appelez la méthode \texttt{connect} (voir la documentation pour les arguments) :
+\begin{lstlisting}[language=C++]
+if (client.connect(device_id.c_str())) {
+	Serial.println("Connected to MQTT broker");
+} else {
+	Serial.print("MQTT connection failed, rc=");
+	Serial.println(client.state());
+}
+\end{lstlisting}
+
+Pour rendre un peu plus générique la connexion, allez voir le fichier d'exemple {\tt mqqt\_basic} et la fonction \texttt{reconnect}. Mettez la en place.\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} Mettez dans le rapport le code que vous avez écrit pour connecter la carte au \broker. Ajouter une capture qui montre le succès de la connexion.}
+  
+%%%%%%%%%%%%%%%%%%%%%%
+ \subsection{Publication et abonnement}
+%%%%%%%%%%%%%%%%%%%%%%
+  
+  La publication d'un message se fait simplement par l'appel à la méthode {\tt publish} :
+\begin{lstlisting}[language=C]
+ client.publish("myTopic","hello world");
+ \end{lstlisting}
+
+L'abonnement se fait à l'aide de la méthode {\tt subscribe} :
+\begin{lstlisting}[language=C]
+ client.subscribe("myTopic");
+ \end{lstlisting}
+
+ Il faut aussi appeler fréquemment la méthode {\tt loop} de la classe {\tt PubSubClient} pour permettre au client de traiter les messages entrants et maintenir sa connexion avec le serveur :
+\begin{lstlisting}[language=C]
+ client.loop();
+ \end{lstlisting}
+
+Testez la publication et l'abonnement avec une carte Feather M0 et MQTT X ou en se connectant via ssh à la \rasp.
+
+Récupérez le code des TP précédents pour avoir accès aux données des boutons. Ajoutez du code pour publier un message (différent) lors de l'appui sur un bouton.\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} Mettez dans le rapport les parties du code que vous avez écrit pour la publication et la souscription. Ajoutez des captures pour montrer que tout cela marche.}
+
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Fonctionnalités avancées}
+%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Message enregistré (Retained Message)}
+%%%%%%%%%%%%%%%%%%%%%%
+
+Pour envoyer avec Mosquitto un message avec l'option "retain" il faut ajouter {\tt -r} à la fin de la commande :
+\begin{lstlisting}[language=bash]
+mosquitto\_pub -t "/test/example" -m "ceci n'est pas un message" -r
+ \end{lstlisting}
+ 
+ Et pour supprimer l'option :
+\begin{lstlisting}[language=bash] 
+mosquitto\_pub -t "/test/example" -r -n
+ \end{lstlisting}
+où {\tt -n} permet d'envoyer un message nul (longueur zéro).
+
+Publiez un topic en mode enregistré ({\it retained}) avec les commandes Mosquitto et instanciez un \sub sur la carte Feather pour ce topic, que constatez vous ? Quel pourrait être l’intérêt d’un tel mécanisme ?\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} Expliquez dans le rapport ce que vous avez constaté et à quoi pourrait servir un tel mécanisme.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Keep Alive}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Observez les échanges de message entre le \broker et votre carte. Pour cela vous allez utiliser l'analyseur de protocole réseau {\bf TShark}\footnote{\href{https://www.wireshark.org/docs/man-pages/tshark.html}{https://www.wireshark.org/docs/man-pages/tshark.html}}. Il vous permet de lire les données de trames sous une forme décodée à partir d'un réseau ou d'un fichier de capture. Le format de fichier de capture natif de TShark est le format pcapng, qui est également le format utilisé par {\bf Wireshark}\footnote{Wireshark est un analyseur de paquets libre et gratuit. Il est utilisé dans le dépannage et l’analyse de réseaux informatiques, le développement de protocoles, l’éducation et la rétro-ingénierie \href{https://fr.wikipedia.org/wiki/Wireshark}{https://fr.wikipedia.org/wiki/Wireshark}} et divers autres outils. TShark est installé sur la \rasp.
+
+Pour observer les messages circulant via le WiFi sur la \rasp, connecter vous en ssh et utiliser la commande :
+\begin{lstlisting}[language=bash] 
+sudo tskark -i wlan0 host 10.3.141.xxx
+\end{lstlisting}
+avec {\tt 10.3.141.xxx} l'adresse IP de votre carte ({\tt wlan0} précise l'interface que vous écoutez).
+
+Pour configurer la durée du Keep Alive de votre connexion MQTT avec la librairie Arduino vous pouvez utiliser la méthode :
+\begin{lstlisting}[language=C] 
+PubSubClient* setKeepAlive (keepAlive)
+\end{lstlisting}
+avec {\tt keepalive} la durée en seconde du maintien en vie. Par défaut la valeur est de 15~s.
+
+Modifiez la durée du Keep Alive, se passe-t-il quelque chose ? Analyser les messages échangés entre la carte et le \broker (via TShark). Comment interprétez-vous le fonctionnement ?
+
+Ajoutez du code sur la Feather pour utiliser de manière cohérente l'option Keep Alive avec une application sur le micro-contrôleur.\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} Expliquez ce que fait Keep Alive et ce que vous avez observé. Mettez les éléments de code et d'explication pour montrer comment vous avez modifié votre code pour utiliser de manière pertinente l'option Keep Alive.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Acte de dernière volonté (Last Will and Testament)}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Le message de {\it Last Will and Testament} (LWT) se configure lors de la connexion avec la méthode {\tt connect} (\url{https://pubsubclient.knolleary.net/api#connect}).
+
+Modifiez l'appel à {\tt connect} dans votre code pour ajouter un LWT. Attention lors de l'appel de {\tt connect} il faut énumérer les paramètres dans le bon ordre même s'ils sont optionnels (rappelez vous les valeurs par défaut en c++), il est donc nécessaire de remplir les champs {\tt username} et {\tt password} avec une chaîne de caractère vide pour ces deux paramètres.
+
+Mettez en place le LWT pour votre carte, préparez un \sub sur le topic du LWT (directement sur la\rasp avec mosquitto ou via MQTTX) et observez les dernières volontés de votre carte (soit en la débranchant sauvagement soit avec un Keep Alive bine configuré).\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} Mettez un extrait de code qui montre comment vous avez mis en place le LWT. Expliquez le fonctionnement et mettez une capture d'écran pour illustrer.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Sessions persistantes et QoS}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%clean\_session false => persitant
+
+%client.connect(device\_id.c\_str(), "", "", "WLT/Feather", 0, true, "dead", false))
+
+Mettez en place un \sub avec un session persistante. A quoi cela peu-il servir ? Trouver dans la documentation comment faire. En quoi la QoS est liée à ce point ?
+
+Tester et montrer que vous l'avez mis en place.\\
+
+\todo[inline, color=green!40]{{\bf Rapport :} Ajoutez tous les éléments de code et de test que vous avez réalisés. Expliquez le rôle de la QoS dans ce mécanisme.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Pour aller plus loin}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Voici trois activités pour aller un peu plus loin dans la maîtrise des outils autour de MQTT. Il n'y a pas d'ordre pour mener ces activités et elles sont là uniquement pour votre culture. Choisissez celle qui vous intéresse. Aucun élément relatif à cette partie n'est nécessaire dans le rapport, ce n'est que pour le plaisir...
+
+Voici trois proposition de travail que vous pouvez réaliser :
+\begin{itemize}
+	\item {\bf Déploiement du \broker Mosquitto :} Déployer le \broker Mosquitto sur votre propre machine. Pour cela il faut transformer votre machine en point d'accès puis installer les paquets nécessaires . Les paquets sont disponibles sur Windows, Mac OS et Linux (\url{https://mosquitto.org/download/}). A vous de suivre ensuite les tutoriaux d'installation propre à chaque système.
+	
+	\item {\bf MQTT over websocket :} si vous avez envie de faire un peu de javascript et d'appeler MQTT depuis un navigateur web via un websocket, vous pouvez suivre le \href{https://www.thomaslaurenson.com/blog/2018-07-10/mqtt-web-app-using-javascript-and-websockets/}{tutorial de Thomas Laurenson}. Le \broker a été configuré pour accepter des websocket sur le port 9001 et le tutorial utilise la librairie javascript de Paho.
+	
+	Le projet Eclipse Paho est un client MQTT open source qui est disponible pour une variété de langages de programmation, y compris JavaScript. La page \href{https://www.eclipse.org/paho/index.php?page=downloads.php}{Eclipse Paho Downloads} fournit un résumé des différents langages de programmation pris en charge et des fonctionnalités fournies pour chacun d'eux.
+	 
+	\item {\bf MQTT Python :} Le projet Paho (voir explication ci-dessus) propose aussi un paquet en Python {\tt paho-mqtt} pour utiliser le protocole MQTT depuis du code en Python. La libraire est très simple à utiliser et de nombreux tutoriaux existent en ligne. 
+	Le tutorial \url{https://www.emqx.com/en/blog/how-to-use-mqtt-in-python} explique de manière claire comment utiliser le paquet et propose un code fonctionnel. \`A vous de le tester et de jouer avec. Vous pouvez aussi vous lancer dans l'utilisation de Paho avec un autre langage, comme le C ou C++ par exemple à vous de choisir...
+\end{itemize}
+
+
+
+\end{document}

@@ -1,0 +1,214 @@
+\documentclass[11pt]{paper}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+
+\usepackage{placeins}
+
+\usepackage{listings}
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\tiny\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  tabsize=2
+}
+
+\usepackage{todonotes}
+
+\newcommand{\version}{1.0.1{ }}
+
+\usepackage[framemethod=TikZ]{mdframed}
+
+\lstset{% general command to set parameter(s)
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{magenta}\bfseries, % underlined bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{black}, % white comments
+	stringstyle=\ttfamily, % typewriter type for strings
+	showstringspaces=false % no special string spaces
+} 
+
+\lstdefinelanguage{aald}
+	{morekeywords={system, implementation},
+	sensitive=false,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.7}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{Temps réel }
+\fancyfoot[LO]{Centrale Nantes -- \today}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+ \setlength{\parskip}{1.2ex plus .9ex minus .4ex}
+
+\newcommand{\ocv}{{\tt OpenCV}\xspace} 
+\newcommand{\alsa}{{\tt ALSA}\xspace} 
+\newcommand{\aadl}{{\tt AADL}\xspace} 
+\newcommand{\xeno}{{\tt Xenomai}\xspace} 
+\newcommand{\iic}{I$^2$C\xspace} 
+
+
+\title{{\Large Systèmes interconnectés -- SINT }\\
+\vspace{-0.4em}
+{\large Sujet de TP 3 : SPI}\\
+{\small Centrale Nantes}\\
+\small P.-E. Hladik, \small{\texttt{pehladik@ec-nantes.fr}}\\
+---\\
+{\scriptsize  Version \version (\today)}\\
+}
+
+
+\begin{document}
+
+\maketitle
+
+%\begin{table}[htdp]
+%\caption{Suivi des modifications}
+%\begin{center}
+%\begin{tabular}{|c|c|c|p{8cm}|}
+%\hline
+%Date & Version & Auteur & Modifications\\
+%\hline
+%JJ/MM/12 & 0.3.X & P.-E. Hladik&  \\
+%\hline
+%\end{tabular}
+%\end{center}
+%\label{default}
+%\end{table}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Objectifs pédagogiques}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{itemize}
+	\item écriture d'un driver logiciel pour le SPI
+	\item écriture d'un driver de communication MCP2515
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Ce qu'il y a à rendre}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Vous déposez sur hippocampus un document pdf avec les parties pertinente de votre code commenté.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Ecrire un drive logiciel}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Ce TP s’effectue sur la carte Feather M0 WiFi. Vous pouvez piocher dans le code des deux activités précédentes.
+
+Ce TP  consiste à programmer une liaison {\bf SPI logicielle} pour communiquer avec le MCP2515. Vous ne devez pas utiliser le périphérique SPI mais uniquement communiquer via les ports d'entrée-sortie (voir le cours). Le datasheet du MCP2525 est disponible sur le serveur pédagogique (a priori ça ne vous servira pas, tout a déjà été dit en cours). 
+
+Vous devez produire quatre fonctions :
+\begin{itemize}
+	\item {\bf Initialisation :} configuration des ports d'entrée-sortie.\\
+	{\tt void initialiserSPILogiciel (void) ;}
+	
+	\item {\bf  Échange de données SPI :} Cette fonction est appelée par les deux fonctions suivantes. Elle sérialise la donnée émise sur MOSI, et retourne la donnée reçue via MISO.\\
+	{\tt byte echangeSPI (const byte inDonneeEmise) ;}
+
+	\item {\bf Écriture d'un registre :} Affecte inValeur au registre {\tt inAdresse}.\\
+	{\tt void ecrireRegistreMCP2515 (const byte inAddresse, const byte inValeur) ;}
+
+	\item {\bf Lecture d'un registre :} Cette fonction retourne la valeur du registre {\tt inAdresse.}\\
+	{\tt  byte lireRegistreMCP2515 (const byte inAddresse) ;}
+\end{itemize}
+\bigskip
+
+L'envoie des bits se fait en MSB et il ne faut pas remettre à la ligne {\tt SS} entre la transmission de 2 octets.
+Vous pouvez utiliser {\tt delayMicroseconds} (\href{https://www.arduino.cc/reference/en/language/functions/time/delaymicroseconds/}{documentation}) pour créer le délai.
+
+{\bf Comment savoir si l'écriture et la lecture fonctionne correctement ?} On va écrire une valeur dans un registre, et relire ce registre et comparer la valeur lue avec la valeur écrite. Il faut sélectionner un registre qui se comporte comme une mémoire : par exemple, le registre TXB0D0, d'adresse 0x36. {\bf Ecrivez votre fonction de test dans le croquis Arduino et faites une capture d'écran avec l'analyseur logique pour montrer les trames.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Utiliser le drive Arduino}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	Vous allez programmer une liaison SPI matérielle pour communiquer avec le MCP2515. Pour utiliser la librairie Arduino, il faut commencer par configurer les broches d'entrée-sortie convenablement. Pour cela suivez les indications ci-dessous.
+
+{\bf Inclusions :} Deux fichiers d'en-tête sont à include :\\
+{\tt \#include <SPI.h>}\\
+{\tt \#include <wiring\_private.h>}\\
+\bigskip
+
+{\bf Variable globale :} Une variable globale mySPI est à déclarer :\\
+{\tt SPIClass mySPI (\&sercom1, 10, 12, 11, SPI\_PAD\_0\_SCK\_3, SERCOM\_RX\_PAD\_2) ;}
+\bigskip
+
+{\bf Initialisation :} Écrire une fonction initialiserSPIMateriel dans laquelle :
+\begin{enumerate}
+	\item le port correspondant à SS est configuré en sortie, et placé au niveau haut (comme pour le SPI logiciel) ; 
+	\item appeler {\tt mySPI.begin ()}, cet appel configure la liaison SPI avec des paramètres par défaut ;
+	\item appeler {\tt mySPI.beginTransaction(SPISettings (10 * 1000 * 1000, MSBFIRST, SPI\_MODE0))}, 
+cet appel fixe la vitesse (10 * 1000 * 1000 = 10 MHz), l'ordre de sérialisation des bits, et le mode ; 
+	\item appeler {\tt pinPeripheral (10, PIO\_SERCOM)}, cet appel relie le port n°10 au module SERCOM ; 
+	\item appeler {\tt pinPeripheral (11, PIO\_SERCOM)}
+	\item appeler {\tt pinPeripheral (12, PIO\_SERCOM)}
+\end{enumerate}
+\bigskip
+
+{\bf Écriture d'un registre, lecture d'un registre :} Appeler la fonction {\tt mySPI.transfer} à la place de la fonction {\tt echangeSPI} utilisée lors de la liaison SPI logicielle.
+
+ {\bf Ecrivez votre fonction de test dans le croquis Arduino et faites une capture d'écran avec l'analyseur logique pour montrer les trames.}
+
+
+\end{document}
