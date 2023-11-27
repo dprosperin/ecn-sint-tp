@@ -258,7 +258,18 @@ Pour réaliser cela il faut mettre au point plusieurs dispositifs :
 
 Pour les derniers points il faut donc aussi écouter la ligne Rx.
 
-Pour chacun de ces composants, décrivez leur interface ainsi que l'automate de leur comportement. Tester les en simulation puis en réelle. Pour tester en réel il vous faudra un transceiver (demander pour les composants et le montage).
+Pour chacun de ces composants, décrivez leur interface ainsi que l'automate de leur comportement. Tester les en simulation puis en réelle.
+
+Pour tester en réel il vous faudra un {\it transceiver}, une breadboard et quelques fils. Vous allez utiliser un MCP2562. La documentation est fournie avec le sujet. La communication entre le CAN et le transceiver se fera sur une broche d'un PMOD de la Basys 3 (à vous de la définir). Le composant MCP2562 ayant besoin d'une alimentation en 5V (et la sortie sur les PMOD étant à 3.3V) vous pouvez repiquer sur la breadboard l'USB qui sort de la carte en utilisanr l'adaptateur micro USB qui vous sera fourni (voir figure~\ref{fig:conn_basys3}).
+
+\begin{figure}[htbp]
+\begin{center}
+	\includegraphics[scale=0.5]{./figures-pdf/mcp2562}
+\caption{Schéma de connexion entre le basys 3 et le MCP2562}
+\label{fig:conn_basys3}
+\end{center}
+\end{figure}
+
 
 Suivez les conseils suivants pour réaliser l'émetteur CAN :
 
