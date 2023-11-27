@@ -1,0 +1,282 @@
+\documentclass[11pt]{paper}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+
+\usepackage{placeins}
+
+\usepackage{listings}
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\tiny\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  tabsize=2
+}
+
+\usepackage{todonotes}
+
+\usepackage[framemethod=TikZ]{mdframed}
+
+\lstset{% general command to set parameter(s)
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{magenta}\bfseries, % underlined bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{black}, % white comments
+	stringstyle=\ttfamily, % typewriter type for strings
+	showstringspaces=false % no special string spaces
+} 
+
+\lstdefinelanguage{aald}
+	{morekeywords={system, implementation},
+	sensitive=false,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.7}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{Temps réel }
+\fancyfoot[LO]{Centrale Nantes -- \today}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+ \setlength{\parskip}{1.2ex plus .9ex minus .4ex}
+
+\newcommand{\ocv}{{\tt OpenCV}\xspace} 
+\newcommand{\alsa}{{\tt ALSA}\xspace} 
+\newcommand{\aadl}{{\tt AADL}\xspace} 
+\newcommand{\xeno}{{\tt Xenomai}\xspace} 
+\newcommand{\iic}{I$^2$C\xspace} 
+
+
+\title{{\Large Systèmes interconnectés -- SINT }\\
+\vspace{-0.4em}
+{\large Sujet de TP 5 : CAN et FPGA (version alternative)}\\
+{\small Centrale Nantes}\\
+\small P.-E. Hladik, \small{\texttt{pehladik@ec-nantes.fr}}\\
+---\\
+{\scriptsize  Version bêta (\today)}\\
+}
+
+
+\begin{document}
+
+\maketitle
+
+%\begin{table}[htdp]
+%\caption{Suivi des modifications}
+%\begin{center}
+%\begin{tabular}{|c|c|c|p{8cm}|}
+%\hline
+%Date & Version & Auteur & Modifications\\
+%\hline
+%JJ/MM/12 & 0.3.X & P.-E. Hladik&  \\
+%\hline
+%\end{tabular}
+%\end{center}
+%\label{default}
+%\end{table}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Objectifs pédagogiques}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Cette version de TP est une version alternative du sujet initial. Elle propose de développer une partie d'un contrôleur CAN et le succès n'est pas assuré...
+
+\begin{itemize}
+	\item spécifier une machine séquentielle à l'aide d'un automate
+	\item simuler et tester une implémentation en VHDL
+	\item intégrer plusieurs entités dans un projet
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Rendu}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+À la fin du TP déposez sur Hippocampus une archive avec un compte rendu en pdf (voir les éléments demandés dans le texte).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Prise en main}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Cette première partie a pour but de reprendre en main Vivado et le VHDL.
+
+\subsection{Création d'un projet}
+
+Commencez par créer un nouveau projet sous Vivado (voir le \href{https://hippocampus.ec-nantes.fr/pluginfile.php/76485/mod_resource/content/4/TUTO%20VIVADO.pdf}{document en ligne} ou la vidéo). 
+Pour cette première étape vous aurez besoin des fichiers {\tt clock\_div.vhd} %et  {\tt display\_basys3.vhd}
+en tant que {\it Design Sources}, de {\tt testbench\_div.vhd} comme {\it Simulation Sources} et {\tt basys3.xdc} comme contraintes. Ces fichiers sont dans l'archive sur Hippocampus. Vous pouvez importer les fichiers à la création du projet ou bien après.
+
+Pour la carte Basys3, il faut sélectionner le composant \og xc7a35tcpg236-1 \fg que l'on peut trouver avec le filtre :
+\begin{itemize}
+	\item Family : Artix-7
+	\item Package : cpg236
+	\item Speed : -1
+\end{itemize}
+
+
+\subsection{Simulation}
+
+Vérifiez que vous avec bien importez {\tt testbench\_div.vhd} dans {\it Simulation Sources} et qu'il est bien au {\it top level} (sinon clic droit et {\it Set as Top}). Ce fichier simule le comportement d'une entité de type {\tt clock\_div}.
+
+Lancez la simulation comportementale (voir vidéo) et observez. Pour l'instant seul le signal reset est simulé. Ajoutez le code nécessaire pour simuler l'horloge à une période de 10~ns et lancez la simulation.
+
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez l'extrait de code du testbench ainsi qu'une capture de la simulation.}
+
+Quel est le rapport cyclique si le diviseur est impair (3 par exemple) ? Observez en simulation le comportement et expliquez les raison en allant lire le code de {\tt clock\_div.vhd}.
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez une capture de la simulation avec un diviseur de 3 et expliquez le comportement observé à partir du code.}
+
+\subsection{Synthèse}
+
+Assurez-vous que vous avez bien importé {\tt display\_sint.vhd} comme {\it Design Sources} et {\tt basys3.xdc} comme contraintes.
+
+Créez un nouveau fichier de conception et mettez le comme {\it Top Level}. Implémentez un système qui fait clignoter une led toutes les 500~ms. Pour cela utilisez le diviseur d'horloge sachant que l'horloge du système a une période de 10~ns. Les signaux physiques dont vous aurez besoin sont :
+\begin{itemize}
+	\item {\tt led0} en sortie,
+	\item {\tt reset} en entrée,
+	\item {\tt clock\_100Mhz} en entrée.
+\end{itemize}
+\bigskip
+
+Ils doivent être déclarés comme ports de votre entité comme dans l'exemple ci-dessous :
+\begin{lstlisting}[language=VHDL]
+entity blink is
+  Port (
+        reset 		: in std_logic;
+        clock_100Mhz 	: in std_logic;
+        led0 		: out std_logic
+        );
+end blink;
+\end{lstlisting}
+et seront ensuite liés aux signaux physiques dans le fichiers de contraintes (vérifiez que les lignes nécessaires dans le fichiers de contraintes {\tt basys.xdc} sont bien décommentées).
+
+Ecrivez le code, faites la synthèse et exécutez le résultat sur la carte.
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez le code produit.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Affichage}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Importez dans votre projet le fichier {\tt display\_sint.vhd}.
+
+L'entitée {\tt display\_basys3} permet d'afficher une valeur en hexadécimale sur l'afficheur 7 segments de la carte. Les ports sont :
+\begin{itemize}
+	\item  {\tt clock\_100Mhz} (entrée) : l'horloge physique de la carte,     %: in std_logic;-- 100Mhz clock on Basys 3 FPGA board
+	\item  {\tt reset } (entrée) : le signal physique de reset de la carte,           %: in std_logic; -- reset
+	\item  {\tt anode\_activate} (entrée) : les signaux physiques des anodes,   % : out std_logic_vector (3 downto 0);-- 4 Anode signals
+	\item  {\tt led\_out} (entrée)  : les signaux physiques des leds de l'afficheur,        % : out std_logic_vector (6 downto 0);-- Cathode patterns of 7-segment display
+	\item  {\tt displayed\_number} (entrée) : la valeur à afficher.%: in std_logic_vector (15 downto 0) -- Decimal number to be displayed on 4-digit 7-segment display
+\end{itemize}
+
+Créez un nouveau fichier et implanter un code qui met à jour toutes les secondes l'afficheur en incrémentant une valeur (vous aurez une horloge hexadécimale). Servez-vous de ce que vous avez fait avant pour le compteur en le copiant dans le nouveau fichier (ou utilisez ce que vous avez fait avant).
+
+Si vous passez par un entier pour coder la valeur à afficher, vous pouvez utiliser
+
+{\tt n <= std\_logic\_vector( to\_unsigned(val, n'length))} 
+
+pour convertir l'entier non signé {\tt val} et l'affecte à un signal {\tt n} de type {\tt std\_logic\_vector} de taille {\tt n'length}.
+
+Pour les contraintes, voir les commentaires dans le fichier {\tt display\_sint.vhd} et décommentez les lignes dans le fichier de contraintes.
+
+\todo[inline, color=green!40]{{\bf Rapport :} mettez le code produit.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Contrôleur CAN}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+L'objectif est de concevoir un contrôleur CAN sur le FPGA pour envoyer un message de type donnée avec un octet. L'identifiant sera fixé ainsi que la fréquence d'envoi (125000 Hz). La trame sera donc fixe pour la partie en-tête mais changera pour la partie donnée. Il faudra donc recalculer le CRC.
+
+Pour réaliser cela il faut mettre au point plusieurs dispositifs :
+\begin{enumerate}
+	\item émettre la trame
+	\item gérer le bit-stuffing
+	\item calculer un CRC
+	\item détecter que la ligne est disponible pour émettre
+	\item gérer les priorités
+	\item gérer les erreurs (non acquitement)
+\end{enumerate}
+
+Pour les derniers points il faut donc aussi écouter la ligne Rx.
+
+Pour chacun de ces composants, décrivez leur interface ainsi que l'automate de leur comportement. Tester les en simulation puis en réelle. Pour tester en réel il vous faudra un transceiver (demander pour les composants et le montage).
+
+Suivez les conseils suivants pour réaliser l'émetteur CAN :
+
+\paragraph{Test d'envoi d'une trame statique.} Pour faire les choses progressivement commencer par émettre une trame statique vers un récepteur CAN (Feather ou Teensys) et vérifier que la trame est bien reçue. Vous pouvez aussi utiliser l'analyseur logique pour vérifier que votre trame est correcte.
+
+\paragraph{Bit-stuffing. } Ajouter ensuite la gestion du bit-stuffing en testant toujours par une émission vers un récepteur ou l'analyseur logique.
+
+\paragraph{Calcul du CRC.} Passer ensuite au calcul du CRC avec une trame dont la partie donnée est variable et émettez le résultat. Utiliser l'analyseur logique pour vérifier que votre CRC est bon.
+
+\paragraph{Détection de l'état de la ligne.} Réaliser un composant pour détecter que la ligne est libre. Pour cela, connecter votre dispositif à un émetteur CAN qui envoi périodiquement des messages. Sortez sur un port PMOD un signal indiquant si la ligne est libre ou non et vérifier avec l'analyseur que le comportement est correct.
+
+\paragraph{Composition émission et état de la ligne.} Composez vos modules d'émission avec le module de détection d'état de la ligne. Tester en interconnectant votre système avec un autre émetteur qui envoie périodiquement des messages et vérifier que votre émetteur n'émet pas quand la ligne n'est pas disponible.
+
+\paragraph{Gestion des priorités.} Réaliser un composant qui vérifie que vous l'émetteur à la priorité pendant son émission. Pour tester votre dispositif, composer un système sur el FPGA avec deux émetteurs synchrones et sortez une ligne pour indiquer qui est prioritaire. Vérifiez à l'aide de l'analyseur logique que tout se passe bien.
+
+\paragraph{Gérer les erreurs.} Si vous en êtes là c'est qu'a priori vous êtes aptes à imaginer comment ajouter et tester ce composant...
+
+\medskip
+\todo[inline, color=green!40]{{\bf Rapport :} pour chacun des composants mettez dans votre rapport l'automate ainsi que le code produit et les résultats de tests réalisés.}
+
+\end{document}
