@@ -185,11 +185,13 @@ Quel est le rapport cyclique si le diviseur est impair (3 par exemple) ? Observe
 
 \todo[inline, color=green!40]{{\bf Rapport :} mettez une capture de la simulation avec un diviseur de 3 et expliquez le comportement observé à partir du code.}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Synthèse}
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Assurez-vous que vous avez bien importé {\tt display\_sint.vhd} comme {\it Design Sources} et {\tt basys3.xdc} comme contraintes.
+Assurez-vous que vous avez bien importé le fichier {\tt basys3.xdc} avec les contraintes.
 
-Créez un nouveau fichier de conception et mettez le comme {\it Top Level}. Implémentez un système qui fait clignoter une led toutes les 500~ms. Pour cela utilisez le diviseur d'horloge sachant que l'horloge du système a une période de 10~ns. Les signaux physiques dont vous aurez besoin sont :
+Créez un nouveau fichier de conception et mettez le comme {\it Top Level}. Implémentez un système qui fait clignoter une led toutes les 500~ms. Pour cela utilisez l'entité diviseur d'horloge vu en simulation sachant que l'horloge du système a une période de 10~ns. Les signaux physiques dont vous aurez besoin sont :
 \begin{itemize}
 	\item {\tt led0} en sortie,
 	\item {\tt reset} en entrée,
@@ -227,6 +229,8 @@ L'entitée {\tt display\_basys3} permet d'afficher une valeur en hexadécimale s
 	\item  {\tt led\_out} (entrée)  : les signaux physiques des leds de l'afficheur,        % : out std_logic_vector (6 downto 0);-- Cathode patterns of 7-segment display
 	\item  {\tt displayed\_number} (entrée) : la valeur à afficher.%: in std_logic_vector (15 downto 0) -- Decimal number to be displayed on 4-digit 7-segment display
 \end{itemize}
+Le code VHDL permettant de contrôler l'afficheur est déjà écrit, vous devez "simplement" le connecter à votre propre code.
+
 
 Créez un nouveau fichier et implanter un code qui met à jour toutes les secondes l'afficheur en incrémentant une valeur (vous aurez une horloge hexadécimale). Servez-vous de ce que vous avez fait avant pour le compteur en le copiant dans le nouveau fichier (ou utilisez ce que vous avez fait avant).
 
@@ -275,7 +279,78 @@ Suivez les conseils suivants pour réaliser l'émetteur CAN :
 
 \paragraph{Test d'envoi d'une trame statique.} Pour faire les choses progressivement commencer par émettre une trame statique vers un récepteur CAN (Feather ou Teensys) et vérifier que la trame est bien reçue. Vous pouvez aussi utiliser l'analyseur logique pour vérifier que votre trame est correcte.
 
-\paragraph{Bit-stuffing. } Ajouter ensuite la gestion du bit-stuffing en testant toujours par une émission vers un récepteur ou l'analyseur logique.
+La trame de la figure~\ref{fig:frame} est tirée de \href{https://en.wikipedia.org/wiki/CAN_bus}{https://en.wikipedia.org/wiki/CAN\_bus} (section bit stuffing) et représente la séquence de bits émis pour un message avec un id  0x14 avec une donnée d'un octet de valeur 0x01. La séquence comportement les bits dus au bit stuffing.
+
+La trame a la valeur suivante :
+0
+0
+0
+0
+0
+1
+0
+0
+1
+0
+1
+0
+0
+0
+0
+0
+1
+0
+0
+0
+1
+0
+0
+0
+0
+0
+1
+0
+0
+1
+0
+1
+0
+0
+0
+0
+1
+1
+0
+0
+0
+0
+0
+1
+0
+0
+1
+0
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+
+\begin{figure}[htbp]
+\begin{center}
+	\includegraphics[width=\textwidth]{./figures-pdf/data}
+\caption{Exemple de trame émise (source \href{https://en.wikipedia.org/wiki/CAN_bus}{https://en.wikipedia.org/wiki/CAN\_bus})}
+\label{fig:frame}
+\end{center}
+\end{figure}
+
+\paragraph{Bit-stuffing. } Modifier l'envoi pour maintenant gérer automatiquement le bit-stuffing. Tester toujours par une émission vers un récepteur ou l'analyseur logique.
 
 \paragraph{Calcul du CRC.} Passer ensuite au calcul du CRC avec une trame dont la partie donnée est variable et émettez le résultat. Utiliser l'analyseur logique pour vérifier que votre CRC est bon.
 
