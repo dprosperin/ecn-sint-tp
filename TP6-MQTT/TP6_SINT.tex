@@ -150,11 +150,11 @@
   \section{Architecture déployée pour le TP}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-Nous utilisons le \broker Mosquitto (\url{https://mosquitto.org}). Il a été déployé sur deux serveurs, un sur une \rasp 3B et l'autre sur une \rasp 4 qui servent de point d'accès. Il y a deux points d'accès car les \rasp limitent le nombre de stations connectées. Les points d'accès ont été configurés à l'aide de RaspAP (\url{https://raspap.com}). Répartissez-vous les points d'accès de manière à ne pas les surcharger.
+Nous utilisons le \broker Mosquitto (\url{https://mosquitto.org}). Il a été déployé sur trois \rasp 3B qui servent de de point d'accès et de serveurs MQTT. Il y a trois points d'accès car les \rasp limitent le nombre de stations connectées. Les points d'accès ont été configurés à l'aide de RaspAP (\url{https://raspap.com}). {\bf Répartissez-vous les points d'accès de manière à ne pas les surcharger}.
 
-Le point d'accès de la \rasp 3B déploie un réseau nommé {\tt raspi-webgui} et celui de la \rasp 4 se nomme {\tt raspi-webgui4}. La clef WEP2 utilisée pour les deux réseaux est {\tt ChangeMe}.
+Le point d'accès d'une la \rasp 3B déploie un réseau nommé {\tt raspi-webguiX} (avec X = \{-, 2, 3\}). La clef WEP2 est identique pour tous les réseaux et est {\tt ChangeMe}.
 
-Une fois établit la connexion WiFi, il est possible de se connecter à la \rasp en ssh avec l'id {\tt pi} et le mot de passe {\tt kywy}. L'adresse IP de la raspberry est {\tt 10.3.141.1}, l'adresse des machines connectées sur le point d'accès est de type {\tt 10.3.141.xxx}.
+Une fois établit la connexion WiFi, il est possible de se connecter à la \rasp en {\tt ssh} avec l'id {\tt pi} et le mot de passe {\tt kywy}. L'adresse IP de la raspberry est {\tt 10.3.141.1}, l'adresse des machines connectées sur le point d'accès est de type {\tt 10.3.141.xxx} (avec xxx attribué à chaque machine se connectant au point d'accès).
 
 Le \broker utilise le port 1883 pour les communication MQTT et 9001 pour le websocket.
 
@@ -177,7 +177,7 @@ systemctl status mosquitto
 
 Pour tester MQTT vous allez créer un client \pub et un \sub sur la \rasp. Lancer deux terminaux et connecter vous depuis chacun à la \rasp.
 
-Utiliser ensuite les commandes {\tt mosquitto\_sub}\footnote{\href{https://mosquitto.org/man/mosquitto_sub-1.html}{https://mosquitto.org/man/mosquitto\_sub-1.html}} et {\tt mosquitto\_pub}\footnote{\href{https://mosquitto.org/man/mosquitto_pub-1.html}{https://mosquitto.org/man/mosquitto\_pub-1.html}} pour créer un \sub et un \pub (chacun dans son terminal). Le premier client s'abonnera au topic que vous voulez et le second devra publier 'helloworld' sur ce topic. {\bf Attention vous allez tous utiliser le même \broker, pensez donc à mettre des noms explicites et uniques pour les topics (par exemple en commençant par votre nom).}
+Utiliser ensuite les commandes {\tt mosquitto\_sub}\footnote{\href{https://mosquitto.org/man/mosquitto_sub-1.html}{https://mosquitto.org/man/mosquitto\_sub-1.html}} et {\tt mosquitto\_pub}\footnote{\href{https://mosquitto.org/man/mosquitto_pub-1.html}{https://mosquitto.org/man/mosquitto\_pub-1.html}} pour créer un \sub et un \pub (chacun dans son terminal). Le premier client s'abonnera au topic que vous voulez et le second devra publier 'helloworld' sur ce topic. {\bf Attention vous allez tous utiliser le même \broker, pensez donc à mettre des noms explicites et uniques pour les topics (par exemple en commençant par votre nom)}.
 
 Utiliser la fonction {\tt mosquitto\_sub} pour s’abonner à un topic et {\tt mosquitto\_pub} pour publier, ces fonctions ont besoin d’arguments (notamment {\tt -t}) que vous pourrez trouver grâce à l'aide ({\tt mosquitto\_sub --help}). Il va falloir trouver l'option pour passer le message de {\tt mosquitto\_pub} (regardez les notes de fin de page).
 
@@ -193,9 +193,9 @@ Maintenant que vous avez réussi, ouvrez un troisième terminal et créez un sec
 
 \subsection{Publication et souscription distante}
 
-Installer le client open-source MQTTX sur votre machine (\url{https://mqttx.app}). {\bf Attention MQTTX n'a été testé que sur Mac OS, si vous constatez que c'est trop compliqué à installer sur votre machine passer à la suite.}
+Installer le client open-source MQTTX sur votre machine (\url{https://mqttx.app}).
 
-Lancer l'application cliente pour vous connectez au \broker. Tester l'envoi et la réception d'un message entre MQQTX et le \broker. Pour cela utiliser le terminal pour disposer d'un \pub ou d'un \sub.\\
+Lancer l'application cliente MQTTX pour vous connectez au \broker. Tester l'envoi et la réception d'un message entre MQTTX et le \broker. Pour cela, comme dans la question précédente, utiliser le terminal pour disposer d'un \pub ou d'un \sub pour envoyer et recevoir des messages avec MQTTX depuis le \broker.\\
 
 \todo[inline, color=green!40]{{\bf Rapport :} mettez une capture d'écran de MQTTX et du terminal qui montre que vous avez réussi à envoyer et recevoir des messages.}
 
