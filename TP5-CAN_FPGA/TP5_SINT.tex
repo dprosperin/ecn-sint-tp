@@ -138,12 +138,10 @@
   \section{Objectifs pédagogiques}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 \begin{itemize}
 	\item spécifier une machine séquentielle à l'aide d'un automate
 	\item simuler et tester une implémentation en VHDL
 	\item intégrer plusieurs entités dans un projet
-	\item comprendre le calcul du CRC
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,13 +154,13 @@
   \section{Prise en main}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-Cette première partie a pour but de reprendre en main Vivado et le VHDL.
+Cette première partie a pour but de (re)prendre en main Vivado et le VHDL.
 
 \subsection{Création d'un projet}
 
-Commencez par créer un nouveau projet sous Vivado (voir le \href{https://hippocampus.ec-nantes.fr/pluginfile.php/76485/mod_resource/content/4/TUTO%20VIVADO.pdf}{document en ligne} ou la vidéo). 
+Commencez par créer un nouveau projet sous Vivado (voir \href{https://hippocampus.ec-nantes.fr/course/view.php?id=2775#section-3}{le document et les vidéos en ligne}). 
 Pour cette première étape vous aurez besoin des fichiers {\tt clock\_div.vhd} %et  {\tt display\_basys3.vhd}
-en tant que {\it Design Sources}, de {\tt testbench\_div.vhd} comme {\it Simulation Sources} et {\tt basys3.xdc} comme contraintes. Ces fichiers sont dans l'archive sur Hippocampus. Vous pouvez importer les fichiers à la création du projet ou bien après.
+en tant que {\it Design Sources}, de {\tt testbench\_div.vhd} comme {\it Simulation Sources} et {\tt basys3.xdc} comme contraintes. Ces fichiers sont disponibles dans le dépôt. Vous pouvez importer les fichiers à la création du projet ou bien après.
 
 Pour la carte Basys3, il faut sélectionner le composant \og xc7a35tcpg236-1 \fg que l'on peut trouver avec le filtre :
 \begin{itemize}
@@ -176,7 +174,7 @@ Pour la carte Basys3, il faut sélectionner le composant \og xc7a35tcpg236-1 \fg
 
 Vérifiez que vous avec bien importez {\tt testbench\_div.vhd} dans {\it Simulation Sources} et qu'il est bien au {\it top level} (sinon clic droit et {\it Set as Top}). Ce fichier simule le comportement d'une entité de type {\tt clock\_div}.
 
-Lancez la simulation comportementale (voir vidéo) et observez. Pour l'instant seul le signal reset est simulé. Ajoutez le code nécessaire pour simuler l'horloge à une période de 10~ns et lancez la simulation.
+Lancez la simulation comportementale (voir vidéo) et observez. Pour l'instant seul le signal {\tt reset} est simulé. Ajoutez le code nécessaire pour simuler l'horloge à une période de 10~ns et lancez la simulation.
 
 
 \todo[inline, color=green!40]{{\bf Rapport :} mettez l'extrait de code du testbench ainsi qu'une capture de la simulation.}
@@ -185,11 +183,13 @@ Quel est le rapport cyclique si le diviseur est impair (3 par exemple) ? Observe
 
 \todo[inline, color=green!40]{{\bf Rapport :} mettez une capture de la simulation avec un diviseur de 3 et expliquez le comportement observé à partir du code.}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Synthèse}
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Assurez-vous que vous avez bien importé {\tt display\_sint.vhd} comme {\it Design Sources} et {\tt basys3.xdc} comme contraintes.
+Assurez-vous que vous avez bien importé le fichier {\tt basys3.xdc} avec les contraintes.
 
-Créez un nouveau fichier de conception et mettez le comme {\it Top Level}. Implémentez un système qui fait clignoter une led toutes les 500~ms. Pour cela utilisez le diviseur d'horloge sachant que l'horloge du système a une période de 10~ns. Les signaux physiques dont vous aurez besoin sont :
+Créez un nouveau fichier de conception et mettez le comme {\it Top Level}. Implémentez un système qui fait clignoter une led toutes les 500~ms. Pour cela {\bf utilisez l'entité diviseur d'horloge} vu en simulation sachant que l'horloge du système a une période de 10~ns. Les signaux physiques dont vous aurez besoin sont :
 \begin{itemize}
 	\item {\tt led0} en sortie,
 	\item {\tt reset} en entrée,
@@ -197,7 +197,9 @@ Créez un nouveau fichier de conception et mettez le comme {\it Top Level}. Impl
 \end{itemize}
 \bigskip
 
-Ils doivent être déclarés comme ports de votre entité comme dans l'exemple ci-dessous :
+{\bf Avant de faire l'implémentation écrivez l'automate de ce composant.}
+
+Les ports doivent être déclarés comme ports de votre entité comme dans l'exemple ci-dessous :
 \begin{lstlisting}[language=VHDL]
 entity blink is
   Port (
@@ -211,199 +213,158 @@ et seront ensuite liés aux signaux physiques dans le fichiers de contraintes (v
 
 Ecrivez le code, faites la synthèse et exécutez le résultat sur la carte.
 
-\todo[inline, color=green!40]{{\bf Rapport :} mettez le code produit.}
+\todo[inline, color=green!40]{{\bf Rapport :} mettez l'automate de votre composant blink ainsi que le code produit.}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  \section{Affichage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%Importez dans votre projet le fichier {\tt display\_sint.vhd}.
+%
+%L'entitée {\tt display\_basys3} permet d'afficher une valeur en hexadécimale sur l'afficheur 7 segments de la carte. Les ports sont :
+%\begin{itemize}
+%	\item  {\tt clock\_100Mhz} (entrée) : l'horloge physique de la carte,     %: in std_logic;-- 100Mhz clock on Basys 3 FPGA board
+%	\item  {\tt reset } (entrée) : le signal physique de reset de la carte,           %: in std_logic; -- reset
+%	\item  {\tt anode\_activate} (entrée) : les signaux physiques des anodes,   % : out std_logic_vector (3 downto 0);-- 4 Anode signals
+%	\item  {\tt led\_out} (entrée)  : les signaux physiques des leds de l'afficheur,        % : out std_logic_vector (6 downto 0);-- Cathode patterns of 7-segment display
+%	\item  {\tt displayed\_number} (entrée) : la valeur à afficher.%: in std_logic_vector (15 downto 0) -- Decimal number to be displayed on 4-digit 7-segment display
+%\end{itemize}
+%Le code VHDL permettant de contrôler l'afficheur est déjà écrit, vous devez "simplement" le connecter à votre propre code.
+%
+%
+%Créez un nouveau fichier et implanter un code qui met à jour toutes les secondes l'afficheur en incrémentant une valeur (vous aurez une horloge hexadécimale). Servez-vous de ce que vous avez fait avant pour le compteur en le copiant dans le nouveau fichier (ou utilisez ce que vous avez fait avant).
+%
+%Si vous passez par un entier pour coder la valeur à afficher, vous pouvez utiliser
+%
+%{\tt n <= std\_logic\_vector( to\_unsigned(val, n'length))} 
+%
+%pour convertir l'entier non signé {\tt val} et l'affecte à un signal {\tt n} de type {\tt std\_logic\_vector} de taille {\tt n'length}.
+%
+%Pour les contraintes, voir les commentaires dans le fichier {\tt display\_sint.vhd} et décommentez les lignes dans le fichier de contraintes.
+%
+%\todo[inline, color=green!40]{{\bf Rapport :} mettez le code produit.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Affichage}
+  \section{Contrôleur CAN}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-Importez dans votre projet le fichier {\tt display\_sint.vhd}.
+L'objectif est de concevoir un contrôleur CAN sur le FPGA pour envoyer un message fixe avec un octet de donnée. L'identifiant sera fixé ainsi que la fréquence d'envoi (125000 Hz). La trame sera donc fixe pour la partie en-tête, mais changera pour la partie donnée. Il faudra donc recalculer le CRC.
 
-L'entitée {\tt display\_basys3} permet d'afficher une valeur en hexadécimale sur l'afficheur 7 segments de la carte. Les ports sont :
-\begin{itemize}
-	\item  {\tt clock\_100Mhz} (entrée) : l'horloge physique de la carte,     %: in std_logic;-- 100Mhz clock on Basys 3 FPGA board
-	\item  {\tt reset } (entrée) : le signal physique de reset de la carte,           %: in std_logic; -- reset
-	\item  {\tt anode\_activate} (entrée) : les signaux physiques des anodes,   % : out std_logic_vector (3 downto 0);-- 4 Anode signals
-	\item  {\tt led\_out} (entrée)  : les signaux physiques des leds de l'afficheur,        % : out std_logic_vector (6 downto 0);-- Cathode patterns of 7-segment display
-	\item  {\tt displayed\_number} (entrée) : la valeur à afficher.%: in std_logic_vector (15 downto 0) -- Decimal number to be displayed on 4-digit 7-segment display
-\end{itemize}
+Pour réaliser cela il faut mettre au point plusieurs dispositifs :
+\begin{enumerate}
+	\item émettre la trame
+	\item gérer le bit-stuffing
+	\item calculer un CRC
+	\item détecter que la ligne est disponible pour émettre
+	\item gérer les priorités
+	\item gérer les erreurs (non acquitement)
+\end{enumerate}
 
-Créez un nouveau fichier et implanter un code qui met à jour toutes les secondes l'afficheur en incrémentant une valeur (vous aurez une horloge hexadécimale). Servez-vous de ce que vous avez fait avant pour le compteur en le copiant dans le nouveau fichier (ou utilisez ce que vous avez fait avant).
+Pour les derniers points il faut donc aussi écouter la ligne Rx.
 
-Si vous passez par un entier pour coder la valeur à afficher, vous pouvez utiliser
+Pour chacun de ces composants, décrivez {\bf leur interface ainsi que l'automate de leur comportement}. Tester les en simulation puis en réelle.
 
-{\tt n <= std\_logic\_vector( to\_unsigned(val, n'length))} 
-
-pour convertir l'entier non signé {\tt val} et l'affecte à un signal {\tt n} de type {\tt std\_logic\_vector} de taille {\tt n'length}.
-
-Pour les contraintes, voir les commentaires dans le fichier {\tt display\_sint.vhd} et décommentez les lignes dans le fichier de contraintes.
-
-\todo[inline, color=green!40]{{\bf Rapport :} mettez le code produit.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Capteur ultrason}
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Dans cette partie vous allez coder le contrôleur d'un capteur \href{https://wiki.seeedstudio.com/Grove-Ultrasonic_Ranger/}{Ultrasonic Ranger V2.0} de Grove. Le principe de fonctionnement d'un capteur à ultrason consiste à émettre
-\og à intervalles réguliers de courtes impulsions sonores à haute fréquence. Ces impulsions se propagent dans l’air à la vitesse du son. Lorsqu’elles rencontrent un objet, elles se réfléchissent et reviennent sous forme d’écho au capteur. [Le capteur] calcule alors la distance le séparant de la cible sur la base du temps écoulé entre l’émission du signal et la réception de l’écho. \fg [\href{https://www.microsonic.de/fr/support/capteurs-à-ultrasons/principe.htm}{microsonic}].
-
-
-Les entrées/sorties de l'ultrasonic ranger sont décrites par la figure~\ref{fig:pinout}. Le seul signal qui nous intéresse est celui identifié comme {\tt SIG}. Physiquement vous pouvez connecter le capteur sur les broches des pmod de la basys3 (voir figure~\ref{fig:pmod}).
+Pour tester en réel il vous faudra un {\it transceiver}, une breadboard et quelques fils. Vous allez utiliser un MCP2562. La documentation est fournie avec le sujet. La communication entre le CAN et le transceiver se fera sur une broche d'un PMOD de la Basys 3 (à vous de la définir). Le composant MCP2562 ayant besoin d'une alimentation en 5V (et la sortie sur les PMOD étant à 3.3V) vous pouvez repiquer sur la breadboard l'USB qui sort de la carte en utilisanr l'adaptateur micro USB qui vous sera fourni (voir figure~\ref{fig:conn_basys3}).
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[scale=0.4]{./figures-pdf/pinout}
-\caption{Entrée/sortie de l'Ultrasonic Ranger V2.0}
-\label{fig:pinout}
+	\includegraphics[scale=0.5]{./figures-pdf/mcp2562}
+\caption{Schéma de connexion entre le basys 3 et le MCP2562}
+\label{fig:conn_basys3}
 \end{center}
 \end{figure}
+
+
+\medskip
+\todo[inline, color=green!40]{{\bf Rapport :} pour chacune des sous-sections suivantes mettez dans votre rapport l'automate ainsi que le code produit et les résultats de tests réalisés. Pas d'automate, pas d'évaluation...}
+
+\subsection{Test d'envoi d'une trame statique} 
+
+Pour faire les choses progressivement, commencer par émettre une trame statique vers un récepteur CAN (Feather ou Teensys) et vérifier que la trame est bien reçue. Vous pouvez aussi utiliser l'analyseur logique pour vérifier que votre trame est correcte.
+
+La trame de la figure~\ref{fig:frame} est tirée de \href{https://en.wikipedia.org/wiki/CAN_bus}{https://en.wikipedia.org/wiki/CAN\_bus} (section bit stuffing) et représente la séquence de bits émis pour un message avec un id  0x14 avec une donnée d'un octet de valeur 0x01. La séquence comportement les bits dus au bit stuffing.
+
+La trame a la valeur suivante :
+0
+0
+0
+0
+0
+1
+0
+0
+1
+0
+1
+0
+0
+0
+0
+0
+1
+0
+0
+0
+1
+0
+0
+0
+0
+0
+1
+0
+0
+1
+0
+1
+0
+0
+0
+0
+1
+1
+0
+0
+0
+0
+0
+1
+0
+0
+1
+0
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[scale=0.45]{./figures-pdf/pmod}
-\caption{Nom des broches des pmod de la basys3}
-\label{fig:pmod}
+	\includegraphics[width=\textwidth]{./figures-pdf/data}
+\caption{Exemple de trame émise (source \href{https://en.wikipedia.org/wiki/CAN_bus}{https://en.wikipedia.org/wiki/CAN\_bus})}
+\label{fig:frame}
 \end{center}
 \end{figure}
 
-\subsection{Spécifications}
+\subsection{Bit-stuffing}
 
-L'entité permettant de contrôler le capteur à ultrason aura pour interface les ports suivants (voir figure~\ref{fig:port_us}) :
+Modifier l'envoi pour gérer automatiquement le bit-stuffing, c'est-à-dire qu'il faut calculer à la volée les bits à ajouter en fonction de la trame envoyée. Tester toujours par une émission vers un récepteur ou l'analyseur logique.
 
-\begin{itemize}
-\item en entrée :
-\begin{itemize}
-	\item clk: une horloge,
-	\item rst : un signal de reset,
-	\item start : un signal pour démarrer une acquisition.
-\end{itemize}
-\item en sortie :
-\begin{itemize}
-    	\item ready : un signal indiquant que le capteur est disponible pour une mesure,
-	\item resReady : un signal indiquant qu'une nouvelle valeur a été produite,
-	\item res : un entier avec la distance mesurée en cm,
-	\item err1 : un signal en cas d'erreur de type 1 (voir après),
-    	\item err2 : un signal en cas d'erreur de type 2 (voir après).
-\end{itemize}
-\item en entrée/sortie (inout en VHDL) :
-\begin{itemize}
-    	\item sig : le signal de contrôle et de donnée vers le capteur externe.
-\end{itemize}
-\end{itemize}
+\subsection{Détection de l'état de la ligne} Réaliser un composant pour détecter que la ligne est libre. Pour cela, connecter votre dispositif à un émetteur CAN qui envoi périodiquement des messages. Sortez sur un port PMOD un signal indiquant si la ligne est libre ou non et vérifier avec l'analyseur que le comportement est correct.
 
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[scale=0.45]{./figures-pdf/port_ultrasound}
-\caption{Port de l'entité ultrason}
-\label{fig:port_us}
-\end{center}
-\end{figure}
+\subsection{Composition émission et état de la ligne} Composez vos modules d'émission avec le module de détection d'état de la ligne. Tester en interconnectant votre système avec un autre émetteur qui envoie périodiquement des messages et vérifier que votre émetteur n'émet pas quand la ligne n'est pas disponible.
 
-L'entité aura aussi deux valeurs de configuration {\tt timeout1} et {\tt timeout2}.
+\subsection{Calcul du CRC} Passer ensuite au calcul du CRC avec une trame dont la partie donnée est variable et émettez le résultat. Utiliser l'analyseur logique pour vérifier que votre CRC est bon.
 
-Le fonctionnement du capteur est simple. Pour lancer une mesure, il faut maintenir sur {\tt sig} un signal à l'état haut pendant 10~$\mu$s, puis attendre de nouveau le passage à l'état haut du signal pour commencer la mesure et arrêter la mesure quand le signal repasse à l'état bas (voir figure~\ref{fig:signal}). La distance à l'obstacle est proportionelle à la durée de l'impulsion mesurée.
+\subsection{Gestion des priorités} Réaliser un composant qui vérifie la priorité en cas de collision. Pour tester votre dispositif, composer un système sur el FPGA avec deux émetteurs synchrones et sortez une ligne pour indiquer qui est prioritaire. Vérifiez à l'aide de l'analyseur logique que tout se passe bien.
 
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[scale=0.45]{./figures-pdf/signal}
-\caption{Signal de contrôle et de mesure du capteur}
-\label{fig:signal}
-\end{center}
-\end{figure}
-
-Le contrôle à réaliser est donc le suivant :
-\begin{itemize}
-	\item Le signal {\tt ready} est à 1 quand le capteur est au repos et 0 sinon.
-	\item Quand le signal {\tt start} est à 1 et que {\tt ready} est à 1, une impulsion de 10~$\mu$s est produite, puis le signal est placé dans l'état Z pour permettre la mesure. 
-	\item La mesure est le temps de l'impulsion. Pour une impulsion $dt$ en $\mu$s, la distance est de $dt / 29 /2$ cm.
-	\item Quand une mesure est produite, {\tt resReady} est mis à 1 et le résultat (en cm) est écrit dans {\tt res}.
-	\item Si le temps entre {\tt t0} et {\tt t1} est supérieur à {\tt timeout1} alors une erreur de type 1 est produite (le signal {\tt err1} passe à 1).	
-	\item Si le temps entre {\tt t1} et {\tt t2} est supérieur à {\tt timeout2} alors une erreur de type 2 est produite (le signal {\tt err2} passe à 1).
-	\item les signaux de sortie sont tous à zéro au début et au lancement d'une nouvelle mesure.
-\end{itemize}
-\bigskip
-
-Représentez la spécification du contrôleur ultrason sous forme d'un automate (Mealy ou Moore au choix).
-
-\todo[inline, color=green!40]{{\bf Rapport :} mettre l'automate qui décrit la spécification du contrôleur ultrason.}
-
-\subsection{Implantation}
-
-Produisez le code de votre contrôleur ultrason.
-
-\todo[inline, color=green!40]{{\bf Rapport :} mettre le code du contrôleur ultrason.}
-
-\subsection{Simulation}
-
-Faites une simulation de votre contrôleur. Pour cela vous aurez besoin de produire un signal d'horloge, mais aussi de {\tt sig} (tant que le signal est contrôlé il faut qu'il soit dans l'état Z).
-
-\todo[inline, color=green!40]{{\bf Rapport :} mettre le code du testbench et une figure montrant son comportement.}
-
-\subsection{Synthèse}
-
-Ecrivez un nouveau code utilisant votre contrôleur ultrason ainsi que l'afficheur pour que :
-\begin{itemize}
-	\item une mesure soit faite toutes les 500~ms,
-	\item le résultat soit affiché,
-	\item la led0 clignote pour montrer une activité,
-	\item la led1 s'allume s'il y a une erreur de type 1,
-	\item la led2 s'allume s'il y a une erreur de type 2,
-	\item la led3 s'allume quand il y a une mesure de réaliser.
-\end{itemize}
-
-Il est fortement conseillé de bien identifier vos entrées/sorties avant de commencer et de faire un petit automate avant de se lancer dans le code.
-
-\todo[inline, color=green!40]{{\bf Rapport :} mettre le code produit.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-  \section{Communication via un bus CAN}
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Dans cette partie, vous allez utiliser la bibliothèque CanLite développée par B.G. Gardner et disponible sur GitHub \href{https://github.com/bggardner/can-lite-vhdl}{https://github.com/bggardner/can-lite-vhdl}. Le code propose une implémentation d'un contrôleur CAN en VHDL. Il a été produit à partir d'un projet de Igor Mohor disponible sur \href{http://www.opencores.org/project,can}{opencores.org}. Les fichiers sources ({\tt CanBus\_pkg.vhd} et {\tt CanLite.vhd}) sont aussi disponibles dans l'archive sur Hippocampus.
-
-Nous n'utiliserons cette bibliothèque que pour l'envoi d'un message. La réception est opérationnelle mais ne sera pas traitée ici (il faut quand même cabler Rx pour que l'envoi d'un message soit validé).
-
-Les ports du composant {\tt CanLite} sont :
-\begin{itemize}
-	\item {\tt Clock} : pour l'horloge (voir le readme du dépôt pour configurer la vitesse de transmission du bus en fonction de la fréquence de l'horloge),
-	\item {\tt Reset\_n} : pour ré-initialiser le contrôleur. Il faut qu'il soit à 1 pour que le bus fonctionne,
-	\item {\tt RxFrame} : signal de type CanBus.Frame avec la valeur de la trame en réception,
-        \item {\tt RxFifoWriteEnable}  : signal pour informer de l'arrivée d'un message,
-        \item {\tt RxFifoFull}  : non identifié (a priori indique sur le buffer de réception est plein) ,               
-        \item {\tt TxFrame} : trame à envoyer,
-        \item {\tt TxFifoReadEnable}  : signal à mettre à 1 pour initier l'envoi, puis à remettre à 0 pour éviter les envois multiples,
-        \item {\tt TxFifoEmpty} : non identifié  (a priori indique sur le buffer d'envoi est plein),
-        \item {\tt TxAck}  : Impulsion à l'état haut lorsqu'un message a été transmis avec succès,            
-        \item {\tt Status} : état du bus,            
-        \item {\tt CanRx} : ligne de réception à mapper sur une broche d'un Pmod,
-        \item {\tt CanTx} : ligne de transmission sur une broche d'un Pmod.
-\end{itemize}
-\bigskip
-
-L'envoi d'un message se fait en écrivant dans {\tt TxFrame} la trame à envoyer, puis en validant l'envoi en mettant à l'état haut {\tt TxFifoReadEnable} (attention s'il reste à l'état haut le message sera immédiatement renvoyé quand la première communication sera terminée).
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-  \subsection{Calcul du CRC}
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Observer le code dans {\tt CanLite} et trouver la partie traitant le CRC. Expliquer le fonctionnement de l'algorithme pour calculer le CRC sachant que :
-\begin{itemize}
-	\item les ports d'entrée {\tt enable} et {\tt initialize} servent uniquement à contrôler l'avancer du calcul,
-	\item au $i^{\text{ème}}$ front montant de l'horloge {\tt clk}, le port d'entrée {\tt data} a pour valeur le $i^{\text{ème}}$ bit de la trame (en commençant par la valeur MSB).
-\end{itemize}
-%voir http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html#ch4 pour le concept de CRC shift register
-\bigskip
-
-\todo[inline, color=green!40]{{\bf Rapport :} expliquez comment le calcul est fait.}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
-  \subsection{Mise en œuvre d'une communication sur un bus CAN}
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-Créer un nouveau code en vous inspirant de ce que vous avez fait avant et ajoutez l'envoi de la donnée via le bus CAN.
-
-\todo[inline, color=green!40]{{\bf Rapport :} réaliser un automate décrivant l'ensemble de l'application et mettez le code produit.}
-
-
+\subsection{Gérer les erreurs} Si vous en êtes là c'est qu'a priori vous êtes aptes à imaginer comment ajouter et tester ce composant...
 
 \end{document}
