@@ -108,7 +108,7 @@
 \vspace{-0.4em}
 {\large Sujet de TP 1 : liaison série asynchrone}\\
 {\small Centrale Nantes}\\
-\small P.-E. Hladik, \small{\texttt{pehladik@ec-nantes.fr}}\\
+\small P.-E. Hladik, \small{\texttt{pierre-emmanuel.hladik@ec-nantes.fr}}\\
 ---\\
 {\scriptsize  Version \version (\today)}\\
 }
@@ -179,7 +179,7 @@ Votre première mission sera de retrouver la configuration de la liaison série 
 
 Pour vous aider dans cette mission, vous disposez de la carte Feather M0 et d'un analyseur logique (un guide sur l'utilisation de PulseView est est disponible sur hippocampus). Attention avec PulseView il vous faudra choisir un {\tt sample rate} cohérent avec les fréquences possible d'une liaison série. Il vous faudra aussi identifier les broches sur lesquelles sont connectées 
 
-Vous disposer d'un projet initial sur \href{https://hippocampus.ec-nantes.fr/mod/resource/view.php?id=22618}{hippocampus} pour pouvoir flasher la carte. Même si le code sur la Feather ne fait rien, des messages sont envoyés sur la liaison série dès qu'un bouton est pressé ou que l'encodeur est manipulé.
+Vous disposer d'un projet initial sur le dépôt \href{https://gitlab.univ-nantes.fr/hladik-pe-1/ecn-sint-tp/-/tree/main/TP1-serie/code/tp1?ref_type=heads}{GitLab} pour pouvoir flasher la carte. Même si le code sur la Feather ne fait rien, des messages sont envoyés sur la liaison série dès qu'un bouton est pressé ou que l'encodeur est manipulé.
 
 %\subsection*{Activité 2 : Driver Arduino}
 %
@@ -191,7 +191,7 @@ Vous disposer d'un projet initial sur \href{https://hippocampus.ec-nantes.fr/mod
 
 \subsection*{Activité 3 : Contrôle des leds et affichage de l'encodeur}
 
-En utilisant le  \href{https://hippocampus.ec-nantes.fr/mod/resource/view.php?id=22618}{projet de départ}, créer un fichier {\tt io.cpp} pour implémenter les fonctions déclarées dans {\tt io.h} :
+En utilisant le  \href{https://gitlab.univ-nantes.fr/hladik-pe-1/ecn-sint-tp/-/tree/main/TP1-serie/code/tp1?ref_type=heads}{projet de départ}, créer un fichier {\tt io.cpp} pour implémenter les fonctions déclarées dans {\tt io.h} :
 \begin{itemize}
 	\item {\tt beginIO} configure la liaison série 1 (entre le PIC et le Feather)
 	\item {\tt ledWrite} allume ou éteind individuellement chaque led
