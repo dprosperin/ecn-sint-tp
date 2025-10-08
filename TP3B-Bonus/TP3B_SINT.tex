@@ -1,0 +1,211 @@
+\documentclass[11pt]{paper}
+
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{amsmath}
+\usepackage{a4wide,color}
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\usepackage{xspace}
+\usepackage{anysize}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancybox}
+\usepackage{fancyhdr}
+\usepackage{bbding}
+
+\usepackage{siunitx}
+
+\usepackage{color}
+\usepackage{float}
+
+\usepackage[toc,page]{appendix} 
+\usepackage{lscape}
+
+\usepackage{placeins}
+
+\usepackage{listings}
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\tiny\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+  tabsize=2
+}
+
+\usepackage{todonotes}
+
+\newcommand{\version}{1.0.1{ }}
+
+\usepackage[framemethod=TikZ]{mdframed}
+
+\lstset{% general command to set parameter(s)
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{magenta}\bfseries, % underlined bold black keywords
+	identifierstyle=, % nothing happens
+	commentstyle=\color{black}, % white comments
+	stringstyle=\ttfamily, % typewriter type for strings
+	showstringspaces=false % no special string spaces
+} 
+
+\lstdefinelanguage{aald}
+	{morekeywords={system, implementation},
+	sensitive=false,
+	morecomment=[l]{//},
+	morecomment=[s]{/*}{*/},
+	morestring=[b]",
+}
+
+\usepackage[colorlinks=true]{hyperref}
+
+\usepackage[normalem]{ulem}
+\usepackage{color}
+
+\definecolor{Fond}{gray}{0.7}
+
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\textfraction}{.01}
+\newcommand{\modif}[1]{\textcolor{red}{\uline{#1}}}
+
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[RE,RO]{\thepage}
+\fancyhead[LE]{}
+\fancyhead[LO]{Temps réel }
+\fancyfoot[LO]{Centrale Nantes -- \today}
+\fancypagestyle{plain}{%
+  \fancyhf{} % get rid of headers
+  \renewcommand{\headrulewidth}{0pt} % and the line
+}
+
+\newenvironment{maliste}%
+{ \begin{list}%
+	{\ArrowBoldRightStrobe}%
+	{\setlength{\labelwidth}{30pt}%
+	 \setlength{\leftmargin}{35pt}%
+	 \setlength{\itemsep}{\parsep}}}%
+{ \end{list} }
+
+ \setlength{\parskip}{1.2ex plus .9ex minus .4ex}
+
+\newcommand{\ocv}{{\tt OpenCV}\xspace} 
+\newcommand{\alsa}{{\tt ALSA}\xspace} 
+\newcommand{\aadl}{{\tt AADL}\xspace} 
+\newcommand{\xeno}{{\tt Xenomai}\xspace} 
+\newcommand{\iic}{I$^2$C\xspace} 
+
+
+\title{{\Large Systèmes interconnectés -- SINT }\\
+\vspace{-0.4em}
+{\large Sujet de TP 3B : BONUS}\\
+{\small Centrale Nantes}\\
+\small P.-E. Hladik, \small{\texttt{pierre-emmanuel.hladik@ec-nantes.fr}}\\
+---\\
+{\scriptsize  Version \version (\today)}\\
+}
+
+
+\begin{document}
+
+\maketitle
+
+%\begin{table}[htdp]
+%\caption{Suivi des modifications}
+%\begin{center}
+%\begin{tabular}{|c|c|c|p{8cm}|}
+%\hline
+%Date & Version & Auteur & Modifications\\
+%\hline
+%JJ/MM/12 & 0.3.X & P.-E. Hladik&  \\
+%\hline
+%\end{tabular}
+%\end{center}
+%\label{default}
+%\end{table}%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{Objectifs pédagogiques}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{itemize}
+	\item intégrer les différents protocole sur une même carte
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Cahier des charges}
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Objet}
+Concevoir une application embarquée permettant de \textbf{configurer l'accéléromètre} à l'aide de \textit{boutons} et d'un \textit{encodeur rotatif avec bouton}, d'afficher l'état courant sur l'écran, puis de lancer un \textbf{mode acquisition} qui affiche et enregistre les mesures des trois axes dans la mémoire du \texttt{MCP2515}.
+
+\subsection{Modes de fonctionnement}
+\begin{itemize}
+  \item \textbf{Mode normal} : l'application est en attente d'une action utilisateur.
+  \item \textbf{Mode configuration} : sélection du plein-échelle de l'accéléromètre (\SI{2}{g}, \SI{4}{g}, \SI{8}{g}).
+  \item \textbf{Mode acquisition} : lecture continue des axes X, Y, Z, affichage à l'écran et écriture en mémoire du \texttt{MCP2515}.
+\end{itemize}
+
+\subsection{Entrée en mode configuration}
+\begin{itemize}
+  \item \textbf{Déclenchement} : appui simultané sur \textbf{Bouton~1} et \textbf{Bouton~2}.
+  \item \textbf{Effet immédiat} :
+    \begin{itemize}
+      \item Interrompre toute mesure/acquisition en cours.
+      \item Afficher explicitement sur l'écran : \texttt{Mode : CONFIGURATION}.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Paramétrage du plein-échelle}
+\begin{itemize}
+  \item \textbf{Sélection} : l'encodeur rotatif permet de parcourir les options de plein-échelle suivantes : \SI{2}{g}, \SI{4}{g}, \SI{8}{g}.
+  \item \textbf{Affichage} : l'écran doit refléter en temps réel l'option surlignée, p.~ex. \texttt{Plein-échelle : 4g (non validé)}.
+  \item \textbf{Validation} : un appui sur le \textbf{bouton de l'encodeur} valide l'option actuellement sélectionnée.
+  \item \textbf{Retour visuel} : afficher un message de confirmation, p.~ex. \texttt{Configuration validée : 4g}.
+  \item \textbf{Application} : la configuration validée est immédiatement appliquée à l'accéléromètre.
+\end{itemize}
+
+\subsection{Lancement du mode acquisition}
+\begin{itemize}
+  \item \textbf{Déclenchement} : appui sur le \textbf{Bouton~3}.
+  \item \textbf{Affichage} : afficher \texttt{Mode : ACQUISITION}.
+  \item \textbf{Affichage des mesures} : montrer en continu les trois valeurs courantes :
+        \begin{center}
+          \texttt{X = \dots,\quad Y = \dots,\quad Z = \dots}
+        \end{center}
+  \item \textbf{Enregistrement} : écrire les trois valeurs (X, Y, Z) dans la mémoire du \texttt{MCP2515} à chaque acquisition.
+\end{itemize}
+
+\subsection{Exigences d'affichage (exemples indicatifs)}
+\begin{itemize}
+  \item \texttt{Mode : CONFIGURATION} lorsqu'on est dans l'écran de réglage.
+  \item \texttt{Plein-échelle : 2g/4g/8g} pendant la navigation à l'encodeur.
+  \item \texttt{Configuration validée : Xg} après validation par le bouton de l'encodeur.
+  \item \texttt{Mode : ACQUISITION} lorsqu'on enregistre et affiche les mesures.
+  \item \texttt{X = \dots\ Y = \dots\ Z = \dots} en acquisition.
+\end{itemize}
+
+\subsection{Critères d'acceptation}
+\begin{enumerate}
+  \item Un appui simultané sur \textbf{Bouton~1 + Bouton~2} interrompt l'acquisition (si en cours) et affiche \texttt{Mode : CONFIGURATION}.
+  \item La rotation de l'encodeur fait défiler \SI{2}{g}, \SI{4}{g}, \SI{8}{g}, et l'écran reflète toujours la sélection courante.
+  \item Un appui sur le \textbf{bouton de l'encodeur} confirme le plein-échelle et affiche \texttt{Configuration validée : Xg}.
+  \item Un appui sur \textbf{Bouton~3} affiche \texttt{Mode : ACQUISITION}, montre en continu X, Y, Z et écrit ces trois valeurs dans la mémoire du \texttt{MCP2515}.
+\end{enumerate}
+
+
+
+
+\end{document}
