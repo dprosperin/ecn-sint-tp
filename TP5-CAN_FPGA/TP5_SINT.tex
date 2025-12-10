@@ -266,6 +266,8 @@ Pour chacun de ces composants, décrivez {\bf leur interface ainsi que l'automat
 
 Pour tester en réel il vous faudra un {\it transceiver}, une breadboard et quelques fils. Vous allez utiliser un MCP2562. La documentation est fournie avec le sujet. La communication entre le CAN et le transceiver se fera sur une broche d'un PMOD de la Basys 3 (à vous de la définir). Le composant MCP2562 ayant besoin d'une alimentation en 5V (et la sortie sur les PMOD étant à 3.3V) vous pouvez repiquer sur la breadboard l'USB qui sort de la carte en utilisanr l'adaptateur micro USB qui vous sera fourni (voir figure~\ref{fig:conn_basys3}).
 
+TODO : REVOIR schéma inversion pin (voir datasheet)
+
 \begin{figure}[htbp]
 \begin{center}
 	\includegraphics[scale=0.5]{./figures-pdf/mcp2562}
@@ -344,6 +346,9 @@ La trame a la valeur suivante :
 1
 1
 1
+
+
+TODO : changer de séquence -> CRC FAUX
 
 \begin{figure}[htbp]
 \begin{center}

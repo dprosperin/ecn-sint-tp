@@ -362,7 +362,7 @@ Observez les échanges de message entre le \broker et votre carte. Pour cela vou
 
 Pour observer les messages circulant via le WiFi sur la \rasp, connecter vous en ssh et utiliser la commande :
 \begin{lstlisting}[language=bash] 
-sudo tskark -i wlan0 host 10.3.141.xxx
+sudo tshark -i wlan0 host 10.3.141.xxx
 \end{lstlisting}
 avec {\tt 10.3.141.xxx} l'adresse IP de votre carte ({\tt wlan0} précise l'interface que vous écoutez).
 
