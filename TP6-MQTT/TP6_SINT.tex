@@ -341,12 +341,12 @@ Récupérez le code des TP précédents pour avoir accès aux données des bouto
 
 Pour envoyer avec Mosquitto un message avec l'option "retain" il faut ajouter {\tt -r} à la fin de la commande :
 \begin{lstlisting}[language=bash]
-mosquitto\_pub -t "/test/example" -m "ceci n'est pas un message" -r
+mosquitto_pub -t "/test/example" -m "ceci n'est pas un message" -r
  \end{lstlisting}
  
  Et pour supprimer l'option :
 \begin{lstlisting}[language=bash] 
-mosquitto\_pub -t "/test/example" -r -n
+mosquitto_pub -t "/test/example" -r -n
  \end{lstlisting}
 où {\tt -n} permet d'envoyer un message nul (longueur zéro).
 
