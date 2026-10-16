@@ -1,3 +1,4 @@
+#include "HardwareSerial.h"
 // 1 - Toujours commencer par ce pragma
 #pragma once
 
@@ -18,10 +19,17 @@ const byte ENCODER_CLIC = 3 ;
 
 // 5 - Déclaration des fonctions
 
-void beginIO (void) ;
+void beginIO (void) {
+    Serial1.begin(19200, SERIAL_8N1);
+}
 
-void ledWrite (const byte inLed, const bool inLevel) ;
+void ledWrite (const byte inLed, const bool inLevel) {
+  const int byteInLevel = inLevel << 2;
+  const int byte = byteInLevel | inLed;
 
-bool pushButton (const byte inButton) ;
+  Serial1.write(byte);
+}
+
+bool pushButton (const byte inButton);
 
 byte encoderValue (void) ;
